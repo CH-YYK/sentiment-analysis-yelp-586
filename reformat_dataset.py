@@ -1,5 +1,8 @@
 import pandas as pd
-import json
+import json, argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--json', default='./data/yelp_academic_dataset_review.json', help='The path to yelp reviws json')
+args = vars(parser.parse_args())
 
 class Json2Data(object):
 
@@ -27,5 +30,4 @@ class Json2Data(object):
         return [json.loads(string) for string in text]
 
 if __name__ == '__main__':
-    json_path = '/Users/kayleyang/Desktop/sentiment-analysis-yelp-586/data/yelp_academic_dataset_review.json'
-    test = Json2Data(json_path)
+    test = Json2Data(json_path=args['json'])
