@@ -2,7 +2,7 @@
 
 ## Data:
 Data set is too large to upload on Github. Data could be found [here](https://www.yelp.com/dataset).
-I use *yelp_academic\_dataset\_review.json* here.
+I use *yelp_academic\_dataset\_review.json* in this repo.
 
 ## Convert _\.json_ to _\.tsv_
 Converting *yelp_academic\_dataset\_review.json* to *yelp_academic\_dataset\_review.tsv*.
