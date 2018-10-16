@@ -1,4 +1,6 @@
 # Sentiment Analysis on Yelp Reviews.
+10/15/2018 update: epoch_size=10, batch_size=128.
+Test accuracy: 88%
 
 ## Data:
 Data set is too large to upload on Github. Data could be found [here](https://www.yelp.com/dataset).
