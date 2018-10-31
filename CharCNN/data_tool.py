@@ -7,28 +7,33 @@ from sklearn.preprocessing import LabelBinarizer
 class data_tool(object):
     def __init__(self, data_path, truncated_length, train_set_ratio=0.8, dev_set_size=600):
         # assign label and texts
-        if os.path.isfile('dataset_x.npy') and os.path.isfile('dataset_y.npy'):
-            print('Load existing index set')
+        self.char_dict = self.character_encoder()
+        self.data = self.clean_data(data_path)
+        #
+        print('Text Encoding: ')
+        if os.path.isfile('dataset_x.npy'):
+            print('\t--Load existing index set X')
             self.data_x = np.load('dataset_x.npy')
-            self.data_y = np.load('dataset_y.npy')
-            self.one_hot_vector = np.load('vocab.npy')
         else:
-            self.data = self.clean_data(data_path)
-            print('Converting text to index')
-            self.char_dict = self.character_encoder()
-
+            print('\t--Converting text to index')
             self.data_x = np.array([self.text2index(text[:truncated_length], self.char_dict, truncated_length)
                                     for text in self.data['text']])
-
-            # label encoding
-            self.encoder_y = LabelBinarizer()
-            self.data_y = self.encoder_y.fit_transform(self.data['stars'].apply(int))
-            print('Save index set')
-
-            # one-hot encoding
-            self.one_hot_vector = self.to_one_hot(self.char_dict, truncated_length)
             np.save('dataset_x', self.data_x)
+        #
+        print('Label Encoding:')
+        if os.path.isfile('dataset_y.npy'):
+            print('\t--Load existing label set y')
+            self.data_y = np.load('dataset_y.npy')
+        else:
+            self.encoder_y = LabelBinarizer()
+            list_y = [-1]+[star for star in self.data['stars'].apply(lambda x: int(x >= 3))]
+            self.data_y = self.encoder_y.fit_transform(list_y)[:, 1:]
             np.save('dataset_y', self.data_y)
+
+        if os.path.isfile('vocab.npy'):
+            self.one_hot_vector = np.load('vocab.npy')
+        else:
+            self.one_hot_vector = self.to_one_hot(self.char_dict, truncated_length)
             np.save('vocab', self.one_hot_vector)
 
         # split raw to train/dev+test

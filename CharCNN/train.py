@@ -23,7 +23,10 @@ class Training(data_tool, CharCNN):
                                  num_classes=self.data_y.shape[1])
 
                 global_step = tf.Variable(0, name='global_step', trainable=False)
-                optimizer = tf.train.AdamOptimizer(0.001)
+                # exponential decaying learning rate:
+                # decayed_learning_rate = learning_rate * decay_rate ^ (global_step / decay_steps)
+                lr = tf.train.exponential_decay(0.005, global_step=global_step, decay_steps=100, decay_rate=0.9)
+                optimizer = tf.train.AdamOptimizer(lr)
                 grads_and_vars = optimizer.compute_gradients(self.loss)
                 train_op = optimizer.apply_gradients(grads_and_vars, global_step)
 
@@ -45,12 +48,12 @@ class Training(data_tool, CharCNN):
 
                 # Train Summaries
                 train_summary_op = tf.summary.merge([loss_summary, acc_summary])
-                train_summary_dir = os.path.join("CharCNN_runs",temp_dir, "summaries", "train")
+                train_summary_dir = os.path.join("CharCNN_runs", temp_dir, "summaries", "train")
                 train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
 
                 # Test Summaries
                 test_summary_op = tf.summary.merge([loss_summary, acc_summary])
-                test_summary_dir = os.path.join('CharCNN_runs',temp_dir, 'summaries', 'test')
+                test_summary_dir = os.path.join('CharCNN_runs', temp_dir, 'summaries', 'test')
                 test_summary_writer = tf.summary.FileWriter(test_summary_dir, sess.graph)
 
                 # define operations
@@ -66,7 +69,6 @@ class Training(data_tool, CharCNN):
                     time_str = datetime.datetime.now().isoformat()
                     print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
                     train_summary_writer.add_summary(summaries, step)
-
 
                 def test_():
                     feed_dict = {self.input_x: self.dev_x,
@@ -86,7 +88,7 @@ class Training(data_tool, CharCNN):
 
                 # generate batches
                 batches_all = self.generate_batches(data_x=self.train_x, data_y=self.train_y, epoch_size=self.epoch_size,
-                                                    batch_size=self.batch_size, shuffle=False)
+                                                    batch_size=self.batch_size, shuffle=True)
                 total_amount = (len(self.train_x) // self.batch_size + 1) * self.epoch_size
 
                 # generate test indices
