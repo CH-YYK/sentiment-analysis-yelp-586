@@ -8,15 +8,15 @@ import time
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-b', '--batch_size', type=int, default=128, help='Set the batch size during training')
-parser.add_argument('-e', '--epoch_size', type=int, default=8, help='Set the epoch size during training')
+parser.add_argument('-b', '--batch_size', type=int, default=256, help='Set the batch size during training')
+parser.add_argument('-e', '--epoch_size', type=int, default=1, help='Set the epoch size during training')
 parser.add_argument('-l', '--seq_length', type=int, default=1014, help='The length to which each sequence will be converted')
-parser.add_argument('-c', '--check_dir', help="The path where the model will be restored")
+parser.add_argument('-c', '--check_dir', default='runs/1540853663/checkpoints', help="The path where the model will be restored")
 
 args = vars(parser.parse_args())
 
 class conf:
-    data_path = '/Users/kayleyang/Desktop/sentiment-analysis-yelp-586/data/yelp_academic_dataset_review.tsv'
+    data_path = 'reviews_2015.tsv'
     check_dir = args['check_dir']
 
     # training configuration
@@ -112,7 +112,7 @@ class Training(data_tool, CharCNN):
 
                 # generate batches
                 batches_all = self.generate_batches(data_x=self.train_x, data_y=self.train_y, epoch_size=self.epoch_size,
-                                                    batch_size=self.batch_size, shuffle=True)
+                                                    batch_size=self.batch_size, shuffle=False)
                 total_amount = (len(self.train_x) // self.batch_size + 1) * self.epoch_size
 
                 # generate test indices
@@ -124,7 +124,7 @@ class Training(data_tool, CharCNN):
                     batch_x, batch_y = batch
                     train_(batch_x, batch_y)
                     current_step = tf.train.global_step(sess, global_step)
-                    if i % 200 == 0:
+                    if i % 1000 == 0:
                         print('\nEvaluation:\n')
                         test_()
                         print("Writing model...\n")

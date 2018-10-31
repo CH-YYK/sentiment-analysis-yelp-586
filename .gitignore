@@ -1,0 +1,6 @@
+*.npy
+*.json
+*.tsv
+.DS_Store
+.DS_Store?
+._*

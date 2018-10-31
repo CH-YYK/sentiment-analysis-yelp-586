@@ -51,7 +51,7 @@ class data_tool(object):
         :return: datatable with target columns
         """
         print('Load dataset...')
-        data = pd.read_table(data_path, sep='\t', nrows=300000)
+        data = pd.read_table(data_path, sep='\t', nrows=500000)
         return data[['text', 'stars']].dropna(axis=0)
 
     def character_corpus(self):

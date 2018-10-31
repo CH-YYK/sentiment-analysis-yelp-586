@@ -1,0 +1,15 @@
+#!/usr/bin/bash
+# split json by the years
+function num_lines {
+    echo "The total number of lines: $1"
+    echo "The path to the data: $2"
+}
+
+export -f num_lines
+
+wc -l data/yelp*.json | xargs -n 2 -I% bash -c num_lines\ %
+
+# pick the data with year 2015
+cat data/*json | grep \"date\"\:\"2015- > data/reviews_2015.json
+echo "data for 2015 extracted"
+exit $?

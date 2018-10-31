@@ -16,7 +16,7 @@ $ cat scripts/years.txt | xargs -I{} bash -c "bash scripts/split_json.sh {}"
 Converting *yelp_academic\_dataset\_review.json* to *yelp_academic\_dataset\_review.tsv*.
 
 ```{bash}
-$ python reformat_dataset.py --json <path/to/json>
+ls ./data/*201*json | xargs -n 1 -I{} bash -c "python json2tsv.py --json={}"```
 ```
 
 ## Training:
