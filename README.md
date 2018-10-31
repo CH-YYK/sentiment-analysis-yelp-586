@@ -6,6 +6,12 @@ Test accuracy: 88%
 Data set is too large to upload on Github. Data could be found [here](https://www.yelp.com/dataset).
 I use *yelp_academic\_dataset\_review.json* in this repo.
 
+A new bash script is added to split data. Run the scripts to split data into pieces by years
+
+```{bash}
+$ cat scripts/years.txt | xargs -I{} bash -c "bash scripts/split_json.sh {}"
+```
+
 ## Convert _\.json_ to _\.tsv_
 Converting *yelp_academic\_dataset\_review.json* to *yelp_academic\_dataset\_review.tsv*.
 
