@@ -1,37 +1,10 @@
 import tensorflow as tf
 import datetime
 import numpy as np
-from CharCNN import CharCNN
-from data_tool import data_tool
+from CharCNN.CharCNN import CharCNN
+from CharCNN.data_tool import data_tool
 import os
 import time
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument('-b', '--batch_size', type=int, default=256, help='Set the batch size during training')
-parser.add_argument('-e', '--epoch_size', type=int, default=1, help='Set the epoch size during training')
-parser.add_argument('-l', '--seq_length', type=int, default=1014, help='The length to which each sequence will be converted')
-parser.add_argument('-c', '--check_dir', default='runs/1540853663/checkpoints', help="The path where the model will be restored")
-
-args = vars(parser.parse_args())
-
-class conf:
-    data_path = 'reviews_2015.tsv'
-    check_dir = args['check_dir']
-
-    # training configuration
-    batch_size = args['batch_size']
-    epoch_size = args['epoch_size']
-
-    # Model configuration
-    truncated_length = args['seq_length']
-    conv_config = [[7, 256, 3],
-                   [7, 256, 3],
-                   [3, 256, None],
-                   [3, 256, None],
-                   [3, 256, None],
-                   [3, 256, 3]]
-    fc_config = [1024, 1024]
 
 
 # Training procedures
@@ -62,7 +35,7 @@ class Training(data_tool, CharCNN):
                     temp_dir = os.path.split(check_dir)[-2]
                 else:
                     temp_dir = str(int(time.time()))
-                checkpoint_dir = os.path.join('runs', temp_dir, 'checkpoints')
+                checkpoint_dir = os.path.join('CharCNN_runs', temp_dir, 'checkpoints')
                 checkpoint_model_dir = checkpoint_dir + '/model.ckpt'
 
                 # Summary for loss and accuracy
@@ -71,12 +44,12 @@ class Training(data_tool, CharCNN):
 
                 # Train Summaries
                 train_summary_op = tf.summary.merge([loss_summary, acc_summary])
-                train_summary_dir = os.path.join("runs",temp_dir, "summaries", "train")
+                train_summary_dir = os.path.join("CharCNN_runs",temp_dir, "summaries", "train")
                 train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
 
                 # Test Summaries
                 test_summary_op = tf.summary.merge([loss_summary, acc_summary])
-                test_summary_dir = os.path.join('runs',temp_dir, 'summaries', 'test')
+                test_summary_dir = os.path.join('CharCNN_runs',temp_dir, 'summaries', 'test')
                 test_summary_writer = tf.summary.FileWriter(test_summary_dir, sess.graph)
 
                 # define operations
@@ -144,7 +117,3 @@ class Training(data_tool, CharCNN):
                                               self.keep_prob: 1.0}))
         result = np.concatenate(result, axis=0)
         print("Test data accuracy:", np.mean(np.equal(np.argmax(self.test_y, axis=1), result)))
-
-if __name__ == '__main__':
-    test = Training(data_path=conf.data_path, truncated_length=conf.truncated_length, conv_config=conf.conv_config,
-                    fc_config=conf.fc_config, batch_size=conf.batch_size, epoch_size=conf.epoch_size, check_dir=conf.check_dir)

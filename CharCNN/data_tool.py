@@ -5,7 +5,6 @@ import os
 
 
 class data_tool(object):
-
     def __init__(self, data_path, truncated_length, train_set_ratio=0.8, dev_set_size=600):
         # load data and corpus
         self.char_dict = self.character_corpus()

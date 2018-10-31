@@ -1,8 +1,7 @@
 import tensorflow as tf
 
 class CharCNN(object):
-
-    def __init__(self, sequence_length, conv_config, fc_config, char_vector, num_classes=5):
+    def __init__(self, sequence_length, conv_config, fc_config, char_vector, num_classes):
         l2_loss = 0
         # define Placeholders
         self.input_x = tf.placeholder(dtype=tf.int32, shape=[None, sequence_length], name='input_x')
