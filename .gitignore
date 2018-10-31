@@ -1,0 +1,14 @@
+*.npy
+*.json
+*.tsv
+.DS_Store
+.DS_Store?
+._*
+__pycache__
+.idea
+*~
+*checkpoints*
+*ckpt*
+*events*
+*.index
+*.meta
