@@ -17,4 +17,4 @@ reviews = pd.read_table('data/reviews_2017.tsv', sep='\t',
 combined_ = business.set_index('business_id').join(reviews.set_index('business_id'), how='inner')
 
 # write to tsv
-combined_.to_csv('data/business_review_2017.tsv', index=False)
+combined_.to_csv('data/business_review_2017.tsv', sep='\t', index=False)
