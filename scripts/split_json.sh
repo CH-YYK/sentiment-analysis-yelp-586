@@ -9,7 +9,7 @@ function num_lines {
 export -f num_lines
 
 # output the size and path of the dataset
-wc -l ./data/yelp*.json | xargs -n 2 -I% bash -c num_lines\ %
+wc -l ./data/yelp*review.json | xargs -n 2 -I% bash -c num_lines\ %
 
 # split datasets by years
 for year in "$@"
