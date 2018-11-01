@@ -16,8 +16,11 @@ class data_tool(object):
             self.data_x = np.load('dataset_x.npy')
         else:
             print('\t--Converting text to index')
-            self.data_x = np.array([self.text2index(text[:truncated_length], self.char_dict, truncated_length)
-                                    for text in self.data['text']])
+            lis = []
+            for i, text in enumerate(self.data['text']):
+                lis.append(self.text2index(text[:truncated_length], self.char_dict, truncated_length))
+
+            self.data_x = np.array(lis)
             np.save('dataset_x', self.data_x)
         #
         print('Label Encoding:')
@@ -26,8 +29,9 @@ class data_tool(object):
             self.data_y = np.load('dataset_y.npy')
         else:
             self.encoder_y = LabelBinarizer()
-            list_y = [-1]+[star for star in self.data['stars'].apply(lambda x: int(x >= 3))]
-            self.data_y = self.encoder_y.fit_transform(list_y)[:, 1:]
+            list_y = [star for star in self.data['stars'].apply(lambda x: int(x > 3))] + [-1]
+            self.data_y = self.encoder_y.fit_transform(list_y)
+            self.data_y = self.data_y[:-1, 1:]
             np.save('dataset_y', self.data_y)
 
         if os.path.isfile('vocab.npy'):
@@ -55,14 +59,14 @@ class data_tool(object):
         :return: datatable with target columns
         """
         print('Load dataset...')
-        data = pd.read_table(data_path, sep='\t', usecols=['text', 'stars'])
-        return data.dropna()
+        data = pd.read_table(data_path, sep='\t', usecols=['text', 'stars'], nrows=500000)
+        return data[data['stars'] != 3].dropna()
 
     def character_encoder(self):
         """
         build character-corpus
         """
-        return dict([(i, j) for j, i in
+        return dict([(i, j+1) for j, i in
                      enumerate("abcdefghijklmnopqrstuvwxyz0123456789,;.!?:\'\"/\\|_@#$%^&*~`+-=<>()[]{}\n")])
 
     def text2index(self, text, vocab_dict, truncated_length):
@@ -71,8 +75,8 @@ class data_tool(object):
         """
         text = self.clean_str(text)
         tmp = [0] * truncated_length
-        for i in range(1, len(text) + 1):
-            tmp[i - 1] = vocab_dict.get(text[-i].lower(), 0)
+        for i in range(0, len(text)):
+            tmp[i] = vocab_dict.get(text[i].lower(), 0)
         return tmp
 
     def clean_str(self, string):
@@ -118,5 +122,5 @@ class data_tool(object):
                 yield batch_x, batch_y
 
 if __name__ == '__main__':
-    data_path = '/Users/kayleyang/Desktop/sentiment-analysis-yelp-586/data/yelp_academic_dataset_review.tsv'
-    test = data_tool(data_path, 1014)
+    data_path = '/home/yikang/Desktop/sentiment-analysis-yelp-586/data/reviews_2015.tsv'
+    test = data_tool(data_path)

@@ -25,7 +25,7 @@ class Training(data_tool, CharCNN):
                 global_step = tf.Variable(0, name='global_step', trainable=False)
                 # exponential decaying learning rate:
                 # decayed_learning_rate = learning_rate * decay_rate ^ (global_step / decay_steps)
-                lr = tf.train.exponential_decay(0.005, global_step=global_step, decay_steps=100, decay_rate=0.9)
+                lr = tf.train.exponential_decay(0.001, global_step=global_step, decay_steps=100, decay_rate=0.9)
                 optimizer = tf.train.AdamOptimizer(lr)
                 grads_and_vars = optimizer.compute_gradients(self.loss)
                 train_op = optimizer.apply_gradients(grads_and_vars, global_step)
@@ -88,7 +88,7 @@ class Training(data_tool, CharCNN):
 
                 # generate batches
                 batches_all = self.generate_batches(data_x=self.train_x, data_y=self.train_y, epoch_size=self.epoch_size,
-                                                    batch_size=self.batch_size, shuffle=True)
+                                                    batch_size=self.batch_size, shuffle=False)
                 total_amount = (len(self.train_x) // self.batch_size + 1) * self.epoch_size
 
                 # generate test indices

@@ -9,7 +9,7 @@ class CharCNN(object):
         self.keep_prob = tf.placeholder(dtype=tf.float32, name='dropout_keep_prob')
 
 
-        with tf.name_scope("character_embedding"), tf.device('/cpu:0'):
+        with tf.name_scope("character_embedding"):
             W = tf.Variable(dtype=tf.float32, initial_value=char_vector,trainable=False,
                             name="character_embedding")
 
