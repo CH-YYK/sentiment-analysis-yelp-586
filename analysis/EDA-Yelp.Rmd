@@ -1,0 +1,48 @@
+---
+title: "EDA for Yelp"
+author: "Yikang"
+date: "November 3, 2018"
+output: pdf_document
+---
+```{r message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(data.table)
+```
+
+## Load data
+```{r message=FALSE}
+data_path <- "~/Desktop/TextData/business_review_2017.tsv"
+Yelp_review <- fread(data_path, sep = '\t')
+Yelp_review <- Yelp_review %>% filter(!is.na(stars), !is.na(review_stars), !is.na(text))
+```
+
+### 1. Basic Statistics of Dataset
+```{r}
+# shape of data
+print(dim(Yelp_review))
+print(table(Yelp_review$stars))
+
+# plot distribution of stars for business
+Yelp_review %>% ggplot(aes(x=factor(stars))) + geom_histogram(stat = "count")
+```
+### 2. Group all reviews by bussiness_id
+```{r}
+# group data on business_id
+Yelp_business_review <- Yelp_review %>% group_by(business_id) %>% 
+  summarise(estimated_review_count=length(review_id),
+            text=paste(text, collapse = '\\n<split>\\n'),
+            review_count=max(review_count),
+            estimated_stars=mean(review_stars),
+            stars=max(stars))
+
+# keep business whose estimated stars are closed to reality
+Yelp_business_review %>% filter(abs(stars - estimated_stars) < 1) -> Yelp_reviews_filtered
+fwrite(Yelp_reviews_filtered, file = '../data/business_filtered.tsv', sep = '\t')
+```
+
+### 2. Attemp 1: Pick useful subset
+```{r}
+review_useful <- Yelp_review %>% filter(useful > 0)
+review_useful %>% ggplot(aes(x=stars)) + geom_histogram()
+```
