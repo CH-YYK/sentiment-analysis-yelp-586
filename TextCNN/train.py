@@ -11,6 +11,7 @@ class Training(data_tool, TextCNN):
                  filters_sizes, num_filters,
                  Glove_path=None, check_dir=None, outdir='./'):
         data_tool.__init__(self, train_data_path=train_data_path, test_data_path=test_data_path, corpus_path=corpus_path, word_vector_path=word_vector_path, Glove_path=Glove_path)
+        self.outdir = outdir
         with tf.Graph().as_default():
             self.sess = tf.Session()
             with self.sess.as_default():
@@ -53,7 +54,7 @@ class Training(data_tool, TextCNN):
                 test_summary_writer = tf.summary.FileWriter(test_summary_dir, self.sess.graph)
 
                 # define operations
-                def train_(batch_x, batch_y):
+                def train_(batch_x, batch_y, total):
                     feed_dict = {self.input_x: batch_x,
                                  self.input_y: batch_y,
                                  self.keep_prob: 0.4}
@@ -63,7 +64,7 @@ class Training(data_tool, TextCNN):
                         feed_dict=feed_dict)
 
                     time_str = datetime.datetime.now().isoformat()
-                    print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+                    print("{}: step {}/{}, loss {:g}, acc {:g}".format(time_str, step, total, loss, accuracy))
                     train_summary_writer.add_summary(summaries, step)
 
                 def test_():
@@ -92,16 +93,16 @@ class Training(data_tool, TextCNN):
                 print("Total step:", total)
                 for i, batch in enumerate(batches_train):
                     batch_x, batch_y = batch
-                    train_(batch_x, batch_y)
+                    train_(batch_x, batch_y, total)
                     current_step = tf.train.global_step(self.sess, global_step)
                     if i % 100 == 0 and i > 0:
                         print('\nEvaluation:\n')
                         loss, accuracy = test_()
                         # print("Writing model...\n")
                         # saver.save(self.sess, checkpoint_model_dir, global_step=current_step)
-                self.Evaluation_test(self.sess, window=500)
+                self.Evaluation_test(self.sess, window=500, save=temp_dir)
 
-    def Evaluation_test(self, sess, window=500):
+    def Evaluation_test(self, sess, window=500, save=None):
         # start testing and saving data
         data_size = len(self.test_x)
         result = []
@@ -112,6 +113,8 @@ class Training(data_tool, TextCNN):
                                               self.keep_prob: 1.0}))
         result = np.concatenate(result, axis=0)
         print("Test data accuracy:", np.mean(np.equal(np.argmax(self.test_y, axis=1), result)))
+        self.test['pred'] = result+1
+        self.test.to_csv(os.path.join(self.outdir, 'TextCNN_runs', save, 'textCNN.tsv'), sep='\t')
 
 if __name__ == '__main__':
     train_data_path = "../data/business_reviews2017_train.tsv"

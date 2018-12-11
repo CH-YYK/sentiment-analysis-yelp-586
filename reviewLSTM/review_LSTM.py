@@ -33,7 +33,7 @@ class reviewLSTM(object):
         with tf.name_scope("output"):
             output_w = tf.get_variable("output_weight", shape=[self.flatten_output.shape[1].value, 5],
                                        initializer=tf.truncated_normal_initializer(mean=0, stddev=0.01))
-            output_bias = tf.get_variable("output_bias", initializer=tf.constant([0.1]*5))
+            output_bias = tf.get_variable("output_bias", initializer=tf.constant([0.01]*5))
 
             l2_loss += tf.nn.l2_loss(output_w)
             l2_loss += tf.nn.l2_loss(output_bias)
@@ -44,7 +44,7 @@ class reviewLSTM(object):
         # loss and accuracy
         with tf.name_scope("loss_accuracy"):
             losses = tf.nn.softmax_cross_entropy_with_logits(logits=self.scores, labels=self.input_y)
-            self.loss = tf.reduce_mean(losses) + 0.06 * l2_loss
+            self.loss = tf.reduce_mean(losses) + 0.01 * l2_loss
             self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.output, tf.argmax(self.input_y, axis=1)), 'float'))
 
 if __name__ == '__main__':

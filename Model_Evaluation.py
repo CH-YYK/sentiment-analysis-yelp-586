@@ -6,8 +6,8 @@ parser.add_argument('-e', '--epoch_size', type=int, default=30, help='Set the ep
 parser.add_argument('-c', '--check_dir', default=None, help="The path where the model will be restored")
 parser.add_argument('-m', '--Model', default='CharCNN', help='The name of the model to be evaluated')
 parser.add_argument('-d', '--Data', default='./data/business_reviews2017.tsv', help='The path to the data set')
-parser.add_argument('--train', default='./data/business_reviews2017_train.tsv', help='The path to training dataset')
-parser.add_argument('--test', default='./data/business_reviews2017_test.tsv', help="The path to testing dataset")
+parser.add_argument('--train', default='./data/business_reviews2017_trunc_train.tsv', help='The path to training dataset')
+parser.add_argument('--test', default='./data/business_reviews2017_trunc_test.tsv', help="The path to testing dataset")
 parser.add_argument('--corpus', default="data/corpus.pkl", help='path to corpus')
 parser.add_argument('--outdir', default='../TextData/', help='The directory to store summaries')
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
         train.Training(train_data_path=conf.train_data_path, test_data_path=conf.test_data_path,
                        corpus_path=conf.corpus_path, word_vector_path=conf.word_vect,
                        batch_size=conf.batch_size, epoch_size=conf.epoch_size, outdir=conf.outDir,
-                       filters_sizes=conf.num_filters, num_filters=conf.num_filters)
+                       filters_sizes=conf.filter_sizes, num_filters=conf.num_filters)
     elif args['Model'].lower() == 'textrnn':
         from TextRNN import train, conf
         conf.train_data_path = args['train']
@@ -68,5 +68,33 @@ if __name__ == '__main__':
         conf.outDir = global_conf.outDir
         train.Training(train_data_path=conf.train_data_path, test_data_path=conf.test_data_path,
                        corpus_path=conf.corpus_path, word_vector_path=conf.word_vect,
-                       rnn_size=conf.rnn_size,
+                       rnn_size=conf.rnn_size, len_words=conf.len_words,
                        batch_size=conf.batch_size, epoch_size=conf.epoch_size, outdir=conf.outDir)
+
+    elif args['Model'].lower() == 'textcnn_cate':
+        from TextCNN_cat import train, conf
+        conf.train_data_path = args['train']
+        conf.test_data_path = args['test']
+        conf.corpus_path = args['corpus']
+        conf.batch_size = global_conf.batch_size
+        conf.epoch_size = global_conf.epoch_size
+        conf.outDir = global_conf.outDir
+        train.Training(train_data_path=conf.train_data_path, test_data_path=conf.test_data_path,
+                       corpus_path=conf.corpus_path, word_vector_path=conf.word_vect,
+                       batch_size=conf.batch_size, epoch_size=conf.epoch_size, outdir=conf.outDir,
+                       filters_sizes=conf.filter_sizes, num_filters=conf.num_filters,
+                       category_corpus_path=conf.category_corpus_path, category_vector_path=conf.category_vector_path)
+
+    elif args['Model'].lower() == 'reviewbilstm':
+        from reviewbiLSTM import train, conf
+        conf.train_data_path = args['train']
+        conf.test_data_path = args['test']
+        conf.corpus_path = args['corpus']
+        conf.batch_size = global_conf.batch_size
+        conf.epoch_size = global_conf.epoch_size
+        conf.outDir = global_conf.outDir
+        train.Training(train_data_path=conf.train_data_path, test_data_path=conf.test_data_path,
+                       corpus_path=conf.corpus_path, word_vector_path=conf.word_vect,
+                       rnn_size=conf.rnn_size, len_words=conf.len_words,
+                       batch_size=conf.batch_size, epoch_size=conf.epoch_size, outdir=conf.outDir,
+                       category_corpus_path=conf.category_corpus_path, category_vector_path=conf.category_vector_path)

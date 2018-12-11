@@ -22,7 +22,7 @@ class TextRNN(object):
         with tf.name_scope("rnn_sequence"):
             lstm_cell = rnn.BasicLSTMCell(rnn_size)
             lstm_cell = rnn.DropoutWrapper(lstm_cell, output_keep_prob=self.keep_prob)
-            self.output, self.state = tf.nn.dynamic_rnn(lstm_cell, self.embedded_char,
+            self.output_, self.state = tf.nn.dynamic_rnn(lstm_cell, self.embedded_char,
                                                         sequence_length=self.real_length, dtype=tf.float32)
 
         # output layer
@@ -41,7 +41,7 @@ class TextRNN(object):
         # compute loss and accuracy
         with tf.name_scope('loss_and_accuracy'):
             loss = tf.nn.softmax_cross_entropy_with_logits(logits=self.scores, labels=self.input_y)
-            self.loss = tf.reduce_mean(loss) + 0.001 * l2_loss
+            self.loss = tf.reduce_mean(loss) + 0.01 * l2_loss
             self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.output, tf.argmax(self.input_y, axis=1)), "float"))
 
 

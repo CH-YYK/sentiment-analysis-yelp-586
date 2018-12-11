@@ -1,10 +1,18 @@
 import pandas as pd
 import numpy as np
-import glob
 import ujson as json
 import re
 import os
 from bs4 import BeautifulSoup
+import argparse
+
+trunc = '_clean'
+truncated_length = 100
+
+## Path to dataset
+path_business = "../data/business.tsv"
+path_review2017 = "../data/reviews_2017.json"
+path_review2017_out = "../data/reviews_2017" + trunc + ".json"
 
 # extract categories for restaurants
 def extract_categories(path='restaurant_categories.html'):
@@ -12,17 +20,14 @@ def extract_categories(path='restaurant_categories.html'):
     soup = BeautifulSoup(html, 'lxml')
     return set([cat.getText(strip=True) for cat in soup.find_all('li')])
 
-## Path to dataset
-path_business = "../data/business.tsv"
-path_review2017 = "../data/reviews_2017.json"
-path_review2017_clean = "../data/reviews_2017_clean.json"
-
 # clean strings
-def clean_str(string):
+def clean_str(string, truncated_length=None):
     '''
     Tokenization/string cleaning forn all dataset except for SST.
     Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     '''
+    if truncated_length:
+        string = ' '.join(string.split()[:truncated_length])
     string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
     string = re.sub(r"[?]{7,}", " \? ", string)
     string = re.sub(r"\'s", " \'s", string)
@@ -49,7 +54,7 @@ def clean_cat(categories, cate_list):
     return np.NaN
 
 # load json for reviews 2017
-if not os.path.isfile(path_review2017_clean):
+if not os.path.isfile(path_review2017_out):
     print("load raw reviews of 2017")
     with open(path_review2017, 'r') as f:
         json_list = [json.loads(line) for line in f.readlines()]
@@ -57,17 +62,18 @@ if not os.path.isfile(path_review2017_clean):
     # clean str
     print("clean texts in json")
     for num in range(len(json_list)):
-        json_list[num]['text'] = clean_str(json_list[num]['text'])
+        json_list[num]['text'] = clean_str(json_list[num]['text'], truncated_length=truncated_length)
 
     # save cleaned json to file
     print("save cleaned json to file")
-    with open(path_review2017_clean, "w") as f:
+    with open(path_review2017_out, "w") as f:
         f.writelines([json.dumps(line) + '\n' for line in json_list])
 else:
     print("load existing json file")
-    with open(path_review2017_clean, "r") as f:
+    with open(path_review2017_out, "r") as f:
         json_list = [json.loads(line) for line in f.readlines()]
 
+    ## ----------------- extract data table from jsons ------------------------##
 ## load data
 print("loading data: 'data_business', 'review2017'")
 data_business = pd.read_table(path_business, sep='\t')
@@ -89,7 +95,7 @@ business_review2017.index = range(business_review2017.shape[0])
 ## group by business_id, find mean for review stars, find most recent 5 reviews
 print("group by 'business_id' and summarise")
 group_review_business = business_review2017.groupby('business_id')
-aggregation = {"text": lambda x: ' ; '.join(x[:5]),
+aggregation = {"text": lambda x: '<UNK>'.join(x[:5]),
                "stars_review": lambda x: x.mean(),
                "categories": "first",
                "state": "first",
@@ -100,8 +106,5 @@ tmp = group_review_business.agg(aggregation)
 print(max([len(i.split()) for i in tmp['text']]))
 
 ## write data out
-tmp['class'] = pd.cut(tmp['stars_review'], [0,1.5,2.5,3.5,4.5,5.5],labels=[1,2,3,4,5])
-tmp.to_csv("../data/business_reviews2017.tsv", sep='\t')
-
-
-# oversamplint
+tmp['class'] = pd.cut(tmp['stars_review'], [0, 1.5, 2.5, 3.5, 4.5, 5.5], labels=[1, 2, 3, 4, 5])
+tmp.to_csv("../data/business_reviews2017{}.tsv".format(trunc), sep='\t')

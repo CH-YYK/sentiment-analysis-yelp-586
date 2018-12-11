@@ -21,7 +21,7 @@ class TextCNN(object):
 
         # word embeddings
         with tf.name_scope('embeddings'):
-            W = tf.get_variable('W', initializer=tf.constant(word_vector, dtype=tf.float32), trainable=False)
+            W = tf.get_variable('W', initializer=tf.constant(word_vector, dtype=tf.float32), trainable=True)
 
             self.embedded_char = tf.nn.embedding_lookup(W, self.input_x, name='embedded_chars')
             self.embedded_char_expanded = tf.expand_dims(self.embedded_char, axis=-1)
@@ -61,7 +61,7 @@ class TextCNN(object):
         # compute loss and accuracy
         with tf.name_scope('loss_and_accuracy'):
             loss = tf.nn.softmax_cross_entropy_with_logits(logits=self.scores, labels=self.input_y)
-            self.loss = tf.reduce_mean(loss) + 0.05 * l2_loss
+            self.loss = tf.reduce_mean(loss) + 0.1 * l2_loss
             self.accuracy = tf.reduce_mean(tf.cast(tf.equal(self.output, tf.argmax(self.input_y, axis=1)), "float"))
 
     def cnn(self, input, filter_size, index):

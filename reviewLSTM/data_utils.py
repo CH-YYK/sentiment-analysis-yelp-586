@@ -37,7 +37,7 @@ class data_tool(object):
         self.train_y = label_binorizer.transform(self.train['class'])
         self.test_y = label_binorizer.transform(self.test['class'])
 
-    def split_reviews(self, texts, separator='\.'):
+    def split_reviews(self, texts, separator='<UNK>'):
         data = []
         for text in texts:
             reviews_ = np.array(list(self.vocab_processor.transform(text.split(separator))))

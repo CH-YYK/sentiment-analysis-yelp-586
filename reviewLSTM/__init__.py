@@ -3,8 +3,11 @@ class conf:
     epoch_size = 30
     rnn_size = 128
 
+    #
+    len_words = 100
+
     train_data_path = 'data/business_reviews2017_train.tsv'
     test_data_path = 'data/business_reviews2017_test.tsv'
     corpus_path = 'data/corpus.pkl'
-    word_vect = 'data/word_vector.npy'
+    word_vect = 'data/word_vec.npy'
     outDir = './'

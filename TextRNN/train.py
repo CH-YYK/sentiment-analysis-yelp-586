@@ -12,6 +12,7 @@ class Training(data_tool, TextRNN):
                  Glove_path=None, check_dir=None):
         data_tool.__init__(self, train_data_path=train_data_path,
                            test_data_path=test_data_path, corpus_path=corpus_path, word_vector_path=word_vector_path, Glove_path=Glove_path)
+        self.outdir = outdir
         with tf.Graph().as_default():
             self.sess = tf.Session()
             with self.sess.as_default():
@@ -100,12 +101,12 @@ class Training(data_tool, TextRNN):
                         loss, accuracy = test_()
                         # print("Writing model...\n")
                         # saver.save(self.sess, checkpoint_model_dir, global_step=current_step)
-                self.Evaluation_test(self.sess, window=500)
+                self.Evaluation_test(self.sess, window=500, save=temp_dir)
 
     def real_words_length(self, batches):
         return np.ceil([np.argmin(batch.tolist() + [0]) for batch in batches.reshape((-1, batches.shape[-1]))])
 
-    def Evaluation_test(self, sess, window=500):
+    def Evaluation_test(self, sess, window=500, save=None):
         # start testing and saving data
         data_size = len(self.test_x)
         result = []
@@ -117,6 +118,8 @@ class Training(data_tool, TextRNN):
                                               self.real_length: self.real_words_length(self.test_x[left_:right_])}))
         result = np.concatenate(result, axis=0)
         print("Test data accuracy:", np.mean(np.equal(np.argmax(self.test_y, axis=1), result)))
+        self.test['pred'] = result+1
+        self.test.to_csv(os.path.join(self.outdir, 'TextRNN_runs', save, 'textrnn.tsv'), sep='\t')
 
 if __name__ == '__main__':
     train_data_path = "../data/business_reviews2017_train.tsv"

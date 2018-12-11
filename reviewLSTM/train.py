@@ -7,18 +7,19 @@ import numpy as np
 
 class Training(data_tool, reviewLSTM):
     def __init__(self, train_data_path, test_data_path, corpus_path, word_vector_path, batch_size, epoch_size,
-                 rnn_size, outdir='./',
+                 rnn_size, len_words, outdir='./',
                  Glove_path=None, check_dir=None):
         data_tool.__init__(self, train_data_path, test_data_path, corpus_path=corpus_path, word_vector_path=word_vector_path,
-                           Glove_path=Glove_path, len_words=100, review_size=5)
+                           Glove_path=Glove_path, len_words=len_words, review_size=5)
+        self.outdir = outdir
         with tf.Graph().as_default():
             self.sess = tf.Session()
             with self.sess.as_default():
                 reviewLSTM.__init__(self, sequence_length=self.len_words, review_length=self.review_size,
-                                    word_vector=self.word_vec, rnn_size=128)
+                                    word_vector=self.word_vec, rnn_size=rnn_size)
 
                 global_step = tf.Variable(0, name='global_step', trainable=False)
-                lr = tf.train.exponential_decay(0.001, global_step=global_step, decay_steps=10000, decay_rate=1)
+                lr = tf.train.exponential_decay(0.001, global_step=global_step, decay_steps=100, decay_rate=0.96)
                 optimizer = tf.train.AdamOptimizer(lr)
                 grads_and_vars = optimizer.compute_gradients(self.loss)
                 train_op = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
@@ -98,12 +99,12 @@ class Training(data_tool, reviewLSTM):
                         loss, accuracy = test_()
                         # print("Writing model...\n")
                         # saver.save(self.sess, checkpoint_model_dir, global_step=current_step)
-                self.Evaluation_test(self.sess, window=500)
+                self.Evaluation_test(self.sess, window=500, save=temp_dir)
 
     def real_words_length(self, batches):
         return np.ceil([np.argmin(batch.tolist() + [0]) for batch in batches.reshape((-1, batches.shape[-1]))])
 
-    def Evaluation_test(self, sess, window=500):
+    def Evaluation_test(self, sess, window=500, save=None):
         # start testing and saving data
         data_size = len(self.test_x)
         result = []
@@ -116,10 +117,6 @@ class Training(data_tool, reviewLSTM):
                                             }))
         result = np.concatenate(result, axis=0)
         print("Test data accuracy:", np.mean(np.equal(np.argmax(self.test_y, axis=1), result)))
+        self.test['pred'] = result+1
+        self.test.to_csv(os.path.join(self.outdir, 'reviewLSTM_runs', save, 'reviewLSTM.tsv'), sep='\t')
 
-if __name__ == '__main__':
-    train_data_path = "../data/business_reviews2017_train.tsv"
-    test_data_path = "../data/business_reviews2017_test.tsv"
-    corpus_path = "../data/corpus.pkl"
-    word_vect = "../data/word_vector.npy"
-    test = Training(train_data_path, test_data_path, corpus_path, word_vect, epoch_size=25)
