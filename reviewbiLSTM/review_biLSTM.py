@@ -99,7 +99,7 @@ class reviewLSTM(object):
             h = fully_connected(input_, shape[-1].value, tf.nn.tanh)
 
             # :[*batch_size, length_*, 1]
-            alpha = tf.nn.softmax(tf.reduce_sum(tf.multiply(weight, h), keepdims=True, axis=-2), dim=1)
+            alpha = tf.nn.softmax(tf.reduce_sum(tf.multiply(weight, h), keepdims=True, axis=2), dim=1)
 
             # :[*batch_size, hidden_units*2]
             return tf.reduce_sum(tf.multiply(input_, alpha), axis=1)
